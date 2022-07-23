@@ -4,39 +4,50 @@
       my Trello
     </header>
     <main>
-      <p class="info-line">All: 0 tasks</p>
-      <!-- ★ここから追記 -->
-      <div class="list-index">
+      <p class="info-line">All: {{ totalCardCount }} tasks</p>
+      <draggable :list="lists"
+            @end="movingList"
+            class="list-index">
         <list v-for="(item, index) in lists"
               :key="item.id"
               :title="item.title"
+              :cards="item.cards"
               :listIndex="index"
+              @change="movingCard"
         />
-        <list-add />
-      </div>
-      <!-- ★ここまで追記 -->
+        <list-add/>
+      </draggable>
     </main>
   </div>
 </template>
 
 <script>
-import ListAdd from './ListAdd'
-// ★ここから追記
+import draggable from 'vuedraggable'
 import List from './List'
+import ListAdd from './ListAdd'
 import { mapState } from 'vuex'
-// ★ここまで追記
 
 export default {
   components: {
     ListAdd,
-    // ★追記
     List,
+    draggable
   },
-  // ★追記
   computed: {
     ...mapState([
       'lists'
     ]),
+    totalCardCount() {
+      return this.$store.getters.totalCardCount
+    }
   },
+  methods: {
+    movingCard: function() {
+      this.$store.dispatch('updateList', { lists: this.lists })
+    },
+    movingList: function() {
+      this.$store.dispatch('updateList', { lists: this.lists })
+    }
+  }
 }
 </script>

@@ -3,18 +3,15 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-const savedLists = localStorage.getItem('trello-lists')　//ローカルストレージへ、値をセット
+const savedLists = localStorage.getItem('trello-lists')
 
-
-const store = new Vuex.Store({
-　state: {
-   　// もしデータがなければ作成
-　  lists: savedLists ? JSON.parse(savedLists): [
+const store =  new Vuex.Store({
+  state: {
+    lists: savedLists ? JSON.parse(savedLists): [
       {
         title: 'Backlog',
         cards: [
           { body: 'English' },
-          { body: 'Mathematics' },
         ]
       },
       {
@@ -29,35 +26,51 @@ const store = new Vuex.Store({
       }
     ],
   },
-  // state(store)へ値を送信
   mutations: {
     addlist(state, payload) {
       state.lists.push({ title: payload.title, cards:[] })
     },
-    // ★ここに追記
     removelist(state, payload) {
       state.lists.splice(payload.listIndex, 1)
     },
+    addCardToList(state, payload) {
+      state.lists[payload.listIndex].cards.push({ body: payload.body })
+    },
+    removeCardFromList(state, payload) {
+      state.lists[payload.listIndex].cards.splice(payload.cardIndex, 1)
+    },
+    updateList(state, payload) {
+      state.lists = payload.lists
+    }
   },
   actions: {
     addlist(context, payload) {
       context.commit('addlist', payload)
     },
-    // ★ここに追記
     removelist(context, payload) {
       context.commit('removelist', payload)
     },
+    addCardToList(context, payload) {
+      context.commit('addCardToList', payload)
+    },
+    removeCardFromList(context, payload) {
+      context.commit('removeCardFromList', payload)
+    },
+    updateList(context, payload) {
+      context.commit('updateList', payload)
+    }
   },
-  
-  // データを変更したければここで
   getters: {
+    totalCardCount(state) {
+      let count = 0
+      state.lists.map(content => count += content.cards.length)
+      return count
+    }
   }
 })
 
-// ここでデータが実際に保存される
 store.subscribe((mutation, state) => {
   localStorage.setItem('trello-lists', JSON.stringify(state.lists))
 })
 
 export default store
-// ★ここまで追記
